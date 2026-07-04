@@ -1105,10 +1105,6 @@
     return map[err.code] || err.message || 'Something went wrong. Please try again.';
   }
 
-  document.getElementById('openAuthBtn').addEventListener('click', ()=>{
-    if(auth.currentUser){ auth.signOut(); return; }
-    openModal(loginOverlay);
-  });
   document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', closeAll));
   document.querySelectorAll('.overlay').forEach(ov=>{
     ov.addEventListener('click', (e)=>{ if(e.target === ov) closeAll(); });
@@ -1124,7 +1120,9 @@
   auth.onAuthStateChanged((user)=>{
     const btn = document.getElementById('openAuthBtn');
     if(user){
-      btn.textContent = 'My Account (' + (user.displayName || user.phoneNumber || 'Signed in') + ')';
+      const label = user.displayName || user.phoneNumber || 'My Account';
+      const shortLabel = label.length > 16 ? label.slice(0, 16) + '…' : label;
+      btn.innerHTML = shortLabel + ' <span style="font-size:10px;">▾</span>';
     } else {
       btn.textContent = 'Sign In';
     }
