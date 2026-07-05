@@ -1191,7 +1191,7 @@
   }
   function openModal(el){ el.classList.add('show'); }
   function closeModal(el){ el.classList.remove('show'); }
-  function closeAll(){ [loginOverlay, signupOverlay, verifyOverlay].forEach(closeModal); }
+  function closeAll(){ document.querySelectorAll('.overlay').forEach(closeModal); }
   function friendlyAuthError(err){
     const map = {
       'auth/popup-closed-by-user': 'Sign-in window was closed before finishing.',
@@ -1803,6 +1803,12 @@
 
   // Build product catalog by reading data already embedded in the bestseller cards —
   // avoids duplicating large base64 image strings anywhere else in the file.
+  // Maps each product id to its standalone product page (separate physical .html files)
+  const PRODUCT_FILES = {
+    p1: 'cosrx-cleanser.html', p2: 'joseon-sunscreen.html', p3: 'axisy-eye-serum.html', p4: 'faceshop-rice-cream.html',
+    p5: 'cerave-cleanser.html', p6: 'cosrx-snail-cream.html', p7: 'cosrx-gel-cleanser.html', p8: 'drrashel-vitc-serum.html'
+  };
+
   const PRODUCTS = Array.from(document.querySelectorAll('#bestsellers .card[data-id]')).map(card => {
     const img = card.querySelector('img');
     const priceText = card.querySelector('.price').textContent.trim();
@@ -1974,7 +1980,7 @@
       </div>`).join('');
 
     grid.querySelectorAll('[data-nav]').forEach(el => {
-      el.addEventListener('click', () => { location.hash = '#/product/' + el.dataset.nav; });
+      el.addEventListener('click', () => { window.location.href = PRODUCT_FILES[el.dataset.nav] || '#'; });
     });
     grid.querySelectorAll('.wish-toggle').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -2089,7 +2095,7 @@
 
     // related product navigation
     wrap.querySelectorAll('[data-nav]').forEach(el => {
-      el.addEventListener('click', () => { location.hash = '#/product/' + el.dataset.nav; });
+      el.addEventListener('click', () => { window.location.href = PRODUCT_FILES[el.dataset.nav] || '#'; });
     });
 
     // product-specific review star picker
@@ -2130,6 +2136,15 @@
       }).catch(err => showToast('Could not save review: ' + err.message));
     });
   }
+
+  // Homepage bestseller cards: clicking the image or name opens the product's standalone page
+  document.querySelectorAll('#bestsellers .card[data-id]').forEach(card => {
+    const media = card.querySelector('.card-media');
+    const name = card.querySelector('.cname');
+    const goTo = () => { window.location.href = PRODUCT_FILES[card.dataset.id] || '#'; };
+    if(media){ media.style.cursor = 'pointer'; media.addEventListener('click', (e) => { if(!e.target.closest('.wish-toggle')) goTo(); }); }
+    if(name){ name.style.cursor = 'pointer'; name.addEventListener('click', goTo); }
+  });
 
   // initial route on page load
   route();
